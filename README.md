@@ -39,12 +39,23 @@
   * [Exiting multiple loops](#exiting-multiple-loops)
   * [Skipping items](#skipping-items)
   * [Infinite loops](#infinite-loops)
+- [Functions](#functions)
+  * [Writing functions](#writing-functions)
+  * [Accepting parameters](#accepting-parameters)
+  * [Returning values](#returning-values)
+  * [Parameter labels](#parameter-labels)
+  * [Omitting parameter labels](#omitting-parameter-labels)
+  * [Default parameters](#default-parameters)
+  * [Variadic functions](#variadic-functions)
+  * [Writing throwing functions](#writing-throwing-functions)
+  * [Running throwing functions](#running-throwing-functions)
+  * [inout parameters](#inout-parameters)
 
 ## Simple types
 
 ### Variables
 
-```
+```swift
 var str = "Hello, playground"
 ```
 
@@ -52,7 +63,7 @@ That creates a new variable called **str**, giving it the value "Hello, playgrou
 
 Because **str** is a variable we can change it:
 
-```
+```swift
 str = "Goodbye"
 ```
 
@@ -62,7 +73,7 @@ We don’t need **var** the second time because the variable has already been cr
 
 Swift is what’s known as a type-safe language, which means that every variable must be of one specific type. 
 
-```
+```swift
 var age = 38
 ```
 
@@ -70,7 +81,7 @@ That holds a whole number, so Swift assigns the type **Int** – short for "inte
 
 If you have large numbers, Swift lets you use underscores as thousands separators – they don’t change the number, but they do make it easier to read. For example:
 
-```
+```swift
 var population = 8_000_000
 ```
 
@@ -82,7 +93,7 @@ Standard Swift strings use double quotes, but you can’t include line breaks in
 
 If you want multi-line strings you need slightly different syntax: start and end with three double quote marks, like this:
 
-```
+```swift
 var str1 = """
 This goes
 over multiple
@@ -94,7 +105,7 @@ Swift is very particular about how you write those quote marks: the opening and 
 
 If you only want multi-line strings to format your code neatly, and you don’t want those line breaks to actually be in your string, end each line with a **\\**, like this:
 
-```
+```swift
 var str2 = """
 This goes \
 over multiple \
@@ -110,7 +121,7 @@ Two other basic types of data in Swift are doubles and booleans, and you’ll be
 
 Whenever you create a variable with a fractional number, Swift automatically gives that variable the type **Double**. For example:
 
-```
+```swift
 var pi = 3.141
 ```
 
@@ -120,7 +131,7 @@ As for booleans, they are much simpler: they just hold either true or false, and
 
 For example:
 
-```
+```swift
 var awesome = true
 ```
 
@@ -128,14 +139,14 @@ var awesome = true
 
 You can place any type of variable inside your string – all you have to do is write a backslash, **\\**, followed by your variable name in parentheses. For example:
 
-```
+```swift
 var score = 85
 var str = "Your score was \(score)"
 ```
 
 You can do this as many times as you need, making strings out of strings if you want:
 
-```
+```swift
 var results = "The test results are here: \(str)"
 ```
 
@@ -147,7 +158,7 @@ Very often you want to set a value once and never change it, and so we have an a
 
 The **let** keyword creates constants, which are values that can be set once and never again. For example:
 
-```
+```swift
 let taylor = "swift"
 ```
 
@@ -159,7 +170,7 @@ Swift assigns each variable and constant a type based on what value it’s given
 
 If you want you can be explicit about the type of your data rather than relying on Swift’s type inference, like this:
 
-```
+```swift
 let album: String = "Reputation"
 let year: Int = 1989
 let height: Double = 1.78
@@ -174,7 +185,7 @@ Arrays are collections of values that are stored as a single value. For example,
 
 In code, we write this:
 
-```
+```swift
 let john = "John Lennon"
 let paul = "Paul McCartney"
 let george = "George Harrison"
@@ -185,9 +196,9 @@ let beatles = [john, paul, george, ringo]
 
 That last line makes the array: it starts and ends with brackets, with each item in the array separated by a comma.
 
-You can read values from an array by writing a number inside brackets. Array positions count from 0, so if you want to read “Paul McCartney” you would write this:
+You can read values from an array by writing a number inside brackets. Array positions count from 0, so if you want to read "Paul McCartney" you would write this:
 
-```
+```swift
 beatles[1]
 ```
 
@@ -195,7 +206,7 @@ Be careful: Swift crashes if you read an item that doesn’t exist. For example,
 
 Note: If you’re using type annotations, arrays are written in brackets: **[String]**, **[Int]**, **[Double]**, and **[Bool]**.
 
-```
+```swift
 var scores: [Int] = [10, 12, 9]
 ```
 
@@ -208,7 +219,7 @@ Sets are collections of values just like arrays, except they have two difference
 
 You can create sets directly from arrays, like this:
 
-```
+```swift
 let colors = Set(["red", "green", "blue"])
 ```
 
@@ -216,7 +227,7 @@ Because they are unordered, you can’t read values from a set using numerical p
 
 If you try to insert a duplicate item into a set, the duplicates get ignored. For example:
 
-```
+```swift
 let colors2 = Set(["red", "green", "blue", "red", "blue"])
 ```
 
@@ -232,13 +243,13 @@ Tuples allow you to store several values together in a single value. That might 
 
 Tuples are created by placing multiple items into parentheses, like this:
 
-```
+```swift
 var name = (first: "Taylor", last: "Swift")
 ```
 
 ou then access items using numerical positions starting from 0, or you can access items using their names:
 
-```
+```swift
 name.0
 name.first
 ```
@@ -251,19 +262,19 @@ Arrays, sets, and tuples can seem similar at first, but they have distinct uses.
 
 If you need a specific, fixed collection of related values where each item has a precise position or name, you should use a tuple:
 
-```
+```swift
 let address = (house: 555, street: "Taylor Swift Avenue", city: "Nashville")
 ```
 
 If you need a collection of values that must be unique or you need to be able to check whether a specific item is in there extremely quickly, you should use a set:
 
-```
+```swift
 let set = Set(["aardvark", "astronaut", "azalea"])
 ```
 
 If you need a collection of values that can contain duplicates, or the order of your items matters, you should use an array:
 
-```
+```swift
 let pythons = ["Eric", "Graham", "John", "Michael", "Terry", "Terry"]
 ```
 
@@ -273,7 +284,7 @@ Dictionaries are collections of values just like arrays, but rather than storing
 
 For example, we could create a dictionary that stores the height of singers using their name:
 
-```
+```swift
 let heights = [
     "Taylor Swift": 1.78,
     "Ed Sheeran": 1.73
@@ -284,7 +295,7 @@ We use a colon to separate the value you want to store (e.g. 1.78) from the iden
 
 These identifiers are called *keys*, and you can use them to read data back out of the dictionary:
 
-```
+```swift
 heights["Taylor Swift"]
 ```
 
@@ -296,7 +307,7 @@ If you try to read a value from a dictionary using a key that doesn’t exist, S
 
 To demonstrate this, let’s create a dictionary of favorite ice creams for two people:
 
-```
+```swift
 let favoriteIceCream = [
     "Paul": "Chocolate",
     "Sophie": "Vanilla"
@@ -305,14 +316,14 @@ let favoriteIceCream = [
 
 We can read Paul’s favorite ice cream. But if we tried reading the favorite ice cream for Charlotte, we’d get back nil, meaning that Swift doesn’t have a value for that key:
 
-```
+```swift
 favoriteIceCream["Paul"]
 favoriteIceCream["Charlotte"]
 ```
 
 We can fix this by giving the dictionary a default value of "Unknown", so that when no ice cream is found for Charlotte we get back "Unknown" rather than nil:
 
-```
+```swift
 favoriteIceCream["Charlotte", default: "Unknown"]
 ```
 
@@ -322,19 +333,19 @@ Arrays, sets, and dictionaries are called collections, because they collect valu
 
 If you want to create an empty collection just write its type followed by opening and closing parentheses. For example, we can create an empty dictionary with strings for keys and values like this:
 
-```
+```swift
 var teams = [String: String]()
 ```
 
 Similarly, you can create an empty array to store integers like this:
 
-```
+```swift
 var results = [Int]()
 ```
 
 The exception is creating an empty set, which is done differently:
 
-```
+```swift
 var words = Set<String>()
 var numbers = Set<Int>()
 ```
@@ -343,7 +354,7 @@ var numbers = Set<Int>()
 
 If you wanted, you could create arrays and dictionaries with similar syntax:
 
-```
+```swift
 var scores = Dictionary<String, Int>()
 var results = Array<Int>()
 ```
@@ -356,7 +367,7 @@ For example, if you wanted to write some code to represent the success or failur
 
 With enums we can define a **Result** type that can be either **success** or **failure**, like this:
 
-```
+```swift
 enum Result {
     case success
     case failure
@@ -365,7 +376,7 @@ enum Result {
 
 And now when we use it we must choose one of those two values:
 
-```
+```swift
 let result = Result.failure
 ```
 
@@ -375,7 +386,7 @@ As well as storing a simple value, enums can also store associated values attach
 
 For example, we might define an enum that stores various kinds of activities. Enum associated values let us add additional details:
 
-```
+```swift
 enum Activity {
     case bored
     case running(destination: String)
@@ -386,7 +397,7 @@ enum Activity {
 
 Now we can be more precise – we can say that someone is talking about football:
 
-```
+```swift
 let talking = Activity.talking(topic: "football")
 ```
 
@@ -396,7 +407,7 @@ Sometimes you need to be able to assign values to enums so they have meaning. Th
 
 For example, you might create a **Planet** enum that stores integer values for each of its cases:
 
-```
+```swift
 enum Planet: Int {
     case mercury
     case venus
@@ -407,13 +418,13 @@ enum Planet: Int {
 
 Swift will automatically assign each of those a number starting from 0, and you can use that number to create an instance of the appropriate enum case. For example, **earth** will be given the number 2, so you can write this:
 
-```
+```swift
 let earth = Planet(rawValue: 2)
 ```
 
 If you want, you can assign one or more cases a specific value, and Swift will generate the rest. It’s not very natural for us to think of Earth as the second planet, so you could write this:
 
-```
+```swift
 enum Planet: Int {
     case mercury = 1
     case venus
@@ -433,14 +444,14 @@ Operators are those little mathematical symbols like + and -, and Swift has a hu
 
 We can add and subtract using **+** and **-**:
 
-```
+```swift
 let total = firstScore + secondScore
 let difference = firstScore - secondScore
 ```
 
 And we can multiply and divide using **\*** and **/**:
 
-```
+```swift
 let product = firstScore * secondScore
 let divided = firstScore / secondScore
 ```
@@ -451,21 +462,21 @@ Swift has a special operator for calculating remainders after division: **%**. I
 
 Swift supports operator overloading, which is a fancy way of saying that what an operator does depends on the values you use it with. For example, **+** sums integers like this:
 
-```
+```swift
 let meaningOfLife = 42
 let doubleMeaning = 42 + 42
 ```
 
 But **+** also joins strings, like this:
 
-```
+```swift
 let fakers = "Fakers gonna "
 let action = fakers + "fake"
 ```
 
 You can even use **+** to join arrays, like this:
 
-```
+```swift
 let firstHalf = ["John", "Paul"]
 let secondHalf = ["George", "Ringo"]
 let beatles = firstHalf + secondHalf
@@ -479,14 +490,14 @@ Swift has shorthand operators that combine one operator with an assignment, so y
 
 For example, if someone scored 95 in an exam but needs to be penalized 5 points, you could write this:
 
-```
+```swift
 var score = 95
 score -= 5
 ```
 
 Similarly, you can add one string to another using **+=**:
 
-```
+```swift
 var quote = "The rain in Spain falls mainly on the "
 quote += "Spaniards"
 ```
@@ -495,23 +506,23 @@ quote += "Spaniards"
 
 Swift has several operators that perform comparison, and these work more or less like you would expect in mathematics.
 
-here are two operators that check for equality: **==** checks two values are the same, and **!=** (pronounced “not equals”) checks two values are not the same:
+here are two operators that check for equality: **==** checks two values are the same, and **!=** (pronounced "not equals") checks two values are not the same:
 
-```
+```swift
 firstScore == secondScore
 firstScore != secondScore
 ```
 
 There are four operators for comparing whether one value is greater than, less than, or equal to another. These are just like in mathematics:
 
-```
+```swift
 firstScore < secondScore
 firstScore >= secondScore
 ```
 
 Each of these also work with strings, because strings have a natural alphabetical order:
 
-```
+```swift
 "Taylor" <= "Swift"
 ```
 
@@ -523,7 +534,7 @@ print(): you run it with some text, and it will be printed out.
 
 We can use conditions to check for a winning Blackjack hand:
 
-```
+```swift
 let firstCard = 11
 let secondCard = 10
 
@@ -534,7 +545,7 @@ if firstCard + secondCard == 21 {
 
 The code inside the braces – **{** and **}** – will be printed if the condition is true. If you want you can provide alternative code to run if the condition is false, using **else**:
 
-```
+```swift
 if firstCard + secondCard == 21 {
     print("Blackjack!")
 } else {
@@ -544,7 +555,7 @@ if firstCard + secondCard == 21 {
 
 You can also chain conditions together using **else if**:
 
-```
+```swift
 if firstCard + secondCard == 2 {
     print("Aces – lucky!")
 } else if firstCard + secondCard == 21 {
@@ -560,7 +571,7 @@ Swift has two special operators that let us combine conditions together: they ar
 
 For example, we could check that the age of two people are both over a certain value like this:
 
-```
+```swift
 let age1 = 12
 let age2 = 21
 
@@ -573,7 +584,7 @@ That **print()** call will only happen if both ages are over 18, which they aren
 
 The alternative to **&&** is **||**, which evaluates as true if either item passes the test. For example we could print a message if either age is over 18:
 
-```
+```swift
 if age1 > 18 || age2 > 18 {
     print("At least one is over 18")
 }
@@ -587,7 +598,7 @@ Swift has a rarely used operator called the ternary operator. It works with thre
 
 The ternary operator is a condition plus true or false blocks all in one, split up by a question mark and a colon, all of which which makes it rather hard to read. Here’s an example:
 
-```
+```swift
 let firstCard = 11
 let secondCard = 10
 print(firstCard == secondCard ? "Cards are the same" : "Cards are different")
@@ -595,7 +606,7 @@ print(firstCard == secondCard ? "Cards are the same" : "Cards are different")
 
 That checks whether the two cards are the same, then prints "Cards are the same" if the condition is true, or "Cards are different" if it’s false. We could write the same code using a regular condition:
 
-```
+```swift
 if firstCard == secondCard {
     print("Cards are the same")
 } else {
@@ -609,13 +620,13 @@ If you have several conditions using **if** and **else if**, it’s often cleare
 
 To try this out, here’s a weather constant containing the string **sunny**:
 
-```
+```swift
 let weather = "sunny"
 ```
 
 We can use a **switch** block to print one of four different messages:
 
-```
+```swift
 switch weather {
 case "rain":
     print("Bring an umbrella")
@@ -632,7 +643,7 @@ In that example, the last case – **default** – is required because Swift mak
 
 Swift will only run the code inside each case. If you want execution to continue on to the next case, use the **fallthrough** keyword like this:
 
-```
+```swift
 switch weather {
 case "rain":
     print("Bring an umbrella")
@@ -654,7 +665,7 @@ For example, the range **1..<5** contains the numbers 1, 2, 3, and 4, whereas th
 
 Ranges are helpful with **switch** blocks, because you can use them for each of your cases. For example, if someone sat an exam we could print different messages depending on their score:
 
-```
+```swift
 let score = 85
 
 switch score {
@@ -679,13 +690,13 @@ The most common loop in Swift is a **for** loop: it will loop over arrays and ra
 
 For example, here’s a range of numbers:
 
-```
+```swift
 let count = 1...10
 ```
 
 We can use a **for** loop to print each item like this:
 
-```
+```swift
 for number in count {
     print("Number is \(number)")
 }
@@ -693,7 +704,7 @@ for number in count {
 
 We can do the same with arrays:
 
-```
+```swift
 let albums = ["Red", "1989", "Reputation"]
 
 for album in albums {
@@ -703,7 +714,7 @@ for album in albums {
 
 If you don’t use the constant that **for** loops give you, you should use an underscore instead so that Swift doesn’t create needless values:
 
-```
+```swift
 print("Players gonna ")
 
 for _ in 1...5 {
@@ -715,11 +726,11 @@ for _ in 1...5 {
 
 A second way of writing loops is using **while**: give it a condition to check, and its loop code will go around and around until the condition fails.
 
-For example, we could use a **while** loop to simulate a child counting in a game of hide and seek: we start at one, count up to and including 20 while printing each number out, then after the loop print “Ready or not”.
+For example, we could use a **while** loop to simulate a child counting in a game of hide and seek: we start at one, count up to and including 20 while printing each number out, then after the loop print "Ready or not".
 
 Here’s how that looks in Swift:
 
-```
+```swift
 var number = 1
 
 while number <= 20 {
@@ -736,7 +747,7 @@ The third way of writing loops is not commonly used, but it’s so simple to lea
 
 So, we could rewrite our hide and seek example like this:
 
-```
+```swift
 var number = 1
 
 repeat {
@@ -751,7 +762,7 @@ Because the condition comes at the end of the **repeat** loop the code inside th
 
 For example, this **print()** function will never be run, because **false** is always false:
 
-```
+```swift
 while false {
     print("This is false")
 }
@@ -761,7 +772,7 @@ Xcode will even warn us that the **print()** line will never be executed.
 
 On the other hand, this **print()** function will be run once, because **repeat** only fails the condition after the loop runs:
 
-```
+```swift
 repeat {
     print("This is false")
 } while false
@@ -771,7 +782,7 @@ repeat {
 
 You can exit a loop at any time using the **break** keyword. To try this out, let’s start with a regular **while** loop that counts down for a rocket launch:
 
-```
+```swift
 var countDown = 10
 
 while countDown >= 0 {
@@ -784,7 +795,7 @@ print("Blast off!")
 
 In this case, the astronaut in command gets bored part-way through the countdown and decides to skip the remainder and launch straight away:
 
-```
+```swift
 while countDown >= 0 {
     print(countDown)
 
@@ -805,7 +816,7 @@ If you put a loop inside a loop it’s called a nested loop, and it’s not unco
 
 As an example, we could write some code to calculate the times tables from 1 through 10 like this:
 
-```
+```swift
 for i in 1...10 {
     for j in 1...10 {
         let product = i * j
@@ -816,7 +827,7 @@ for i in 1...10 {
 
 If we wanted to exit part-way through we need to do two things. First, we give the outside loop a label, like this:
 
-```
+```swift
 outerLoop: for i in 1...10 {
     for j in 1...10 {
         let product = i * j
@@ -827,7 +838,7 @@ outerLoop: for i in 1...10 {
 
 Second, add our condition inside the inner loop, then use **break outerLoop** to exit both loops at the same time:
 
-```
+```swift
 outerLoop: for i in 1...10 {
     for j in 1...10 {
         let product = i * j
@@ -849,7 +860,7 @@ As you’ve seen, the **break** keyword exits a loop. But if you just want to sk
 
 To try this out, we can write a loop from 1 through 10, then use Swift’s remainder operator to skip any numbers that are odd:
 
-```
+```swift
 for i in 1...10 {
     if i % 2 == 1 {
         continue
@@ -869,9 +880,9 @@ To make an infinite loop, just use **true** as your condition. **true** is alway
 
 As an example, we’re going to use **while true** to print the music of John Cage’s piece 4’33” – if you didn’t know, it’s famous because it’s 4 minutes and 33 seconds of complete silence.
 
-We can write the “music” for this piece using **while true**, with a condition that exits the loop when we’ve gone around enough times:
+We can write the "music" for this piece using **while true**, with a condition that exits the loop when we’ve gone around enough times:
 
-```
+```swift
 var counter = 0
 
 while true {
@@ -882,4 +893,257 @@ while true {
         break
     }
 }
+```
+
+## Functions
+
+### Writing functions
+
+Functions let us re-use code, which means we can write a function to do something interesting then run that function from lots of places. Repeating code is generally a bad idea, and functions help us avoid doing that.
+
+To start with, we’re going to write a function that prints help information for users of our app. We might need this anywhere in our app, so having it as a function is a good idea.
+
+Swift functions start with the **func** keyword, then your function name, then open and close parentheses. All the body of your function – the code that should be run when the function is requested – is placed inside braces.
+
+Let’s write the **printHelp()** function now:
+
+```swift
+func printHelp() {
+    let message = """
+Welcome to MyApp!
+
+Run this app inside a directory of images and
+MyApp will resize them all into thumbnails
+"""
+
+    print(message)
+}
+```
+
+We can now run that using **printHelp()** by itself:
+
+```swift
+printHelp()
+```
+
+Running a function is often referred to as calling a function.
+
+### Accepting parameters
+
+Functions become more powerful when they can be customized each time you run them. Swift lets you send values to a function that can then be used inside the function to change the way it behaves. We’ve used this already – we’ve been sending strings and integers to the **print()** function, like this:
+
+```swift
+print("Hello, world!")
+```
+
+Values sent into functions this way are called parameters.
+
+To make your own functions accept parameters, give each parameter a name, then a colon, then tell Swift the type of data it must be. All this goes inside the parentheses after your function name.
+
+For example, we can write a function to print the square of any number:
+
+```swift
+func square(number: Int) {
+    print(number * number)
+}
+```
+
+That tells Swift we expect to receive an **Int**, and it should be called **number**. This name is used both inside the function when you want to refer to the parameter, but also when you run the function, like this:
+
+```swift
+square(number: 8)
+```
+
+### Returning values
+
+As well as receiving data, functions can also send back data. To do this, write a dash then a right angle bracket after your function’s parameter list, then tell Swift what kind of data will be returned.
+
+Inside your function, you use the **return** keyword to send a value back if you have one. Your function then immediately exits, sending back that value – no other code from that function will be run.
+
+We could rewrite our **square()** function to return a value rather than print it directly:
+
+```swift
+func square(number: Int) -> Int {
+    return number * number
+}
+```
+
+Now we can grab that return value when the function is run, and print it there:
+
+```swift
+let result = square(number: 8)
+print(result)
+```
+
+If you need to return multiple values, this is a perfect example of when to use tuples.
+
+### Parameter labels
+
+We wrote our **square()** function like this:
+
+```swift
+func square(number: Int) -> Int {
+    return number * number
+}
+```
+
+That names its parameter **number**, so we can use **number** inside the function to refer to it, but we must also use the name when running the function, like this:
+
+```swift
+let result = square(number: 8)
+```
+
+Swift lets us provide two names for each parameter: one to be used externally when calling the function, and one to be used internally inside the function. This is as simple as writing two names, separated by a space.
+
+To demonstrate this, here’s a function that uses two names for its string parameter:
+
+```swift
+func sayHello(to name: String) {
+    print("Hello, \(name)!")
+}
+```
+
+The parameter is called **to name**, which means externally it’s called **to**, but internally it’s called **name**. This gives variables a sensible name inside the function, but means calling the function reads naturally:
+
+```swift
+sayHello(to: "Taylor")
+```
+
+### Omitting parameter labels
+
+You might have noticed that we don’t actually send any parameter names when we call **print()** – we say **print("Hello")** rather than **print(message: "Hello")**.
+
+You can get this same behavior in your own functions by using an underscore, **_**, for your external parameter name, like this:
+
+```swift
+func greet(_ person: String) {
+    print("Hello, \(person)!")
+}
+```
+
+You can now call **greet()** without having to use the **person** parameter name:
+
+```swift
+greet("Taylor")
+```
+
+This can make some code more natural to read, but generally it’s better to give your parameters external names to avoid confusion. For example, if I say **setAlarm(5)** it’s hard to tell what that means – does it set an alarm for five o’clock, set an alarm for five hours from now, or activate pre-configured alarm number 5?
+
+### Default parameters
+
+The **print()** function prints something to the screen, but always adds a new line to the end of whatever you printed, so that multiple calls to **print()** don’t all appear on the same line.
+
+You can change that behavior if you want, so you could use spaces rather than line breaks. Most of the time, though, folks want new lines, so **print()** has a **terminator** parameter that uses new line as its default value.
+
+You can give your own parameters a default value just by writing an **=** after its type followed by the default you want to give it. So, we could write a **greet()** function that can optionally print nice greetings:
+
+```swift
+func greet(_ person: String, nicely: Bool = true) {
+    if nicely == true {
+        print("Hello, \(person)!")
+    } else {
+        print("Oh no, it's \(person) again...")
+    }
+}
+```
+
+That can be called in two ways:
+
+```swift
+greet("Taylor")
+greet("Taylor", nicely: false)
+```
+
+### Variadic functions
+
+Some functions are variadic, which is a fancy way of saying they accept any number of parameters of the same type. The **print()** function is actually variadic: if you pass lots of parameters, they are all printed on one line with spaces between them:
+
+```swift
+print("Haters", "gonna", "hate")
+```
+
+You can make any parameter variadic by writing ... after its type. So, an **Int** parameter is a single integer, whereas **Int...** is zero or more integers – potentially hundreds.
+
+Inside the function, Swift converts the values that were passed in to an array of integers, so you can loop over them as needed.
+
+To try this out, let’s write a **square()** function that can square many numbers:
+
+```swift
+func square(numbers: Int...) {
+    for number in numbers {
+        print("\(number) squared is \(number * number)")
+    }
+}
+```
+
+Now we can run that with lots of numbers just by passing them in separated by commas:
+
+```swift
+square(numbers: 1, 2, 3, 4, 5)
+```
+
+### Writing throwing functions
+
+Sometimes functions fail because they have bad input, or because something went wrong internally. Swift lets us throw errors from functions by marking them as **throws** before their return type, then using the **throw** keyword when something goes wrong.
+
+First we need to define an **enum** that describes the errors we can throw. These must always be based on Swift’s existing **Error** type. We’re going to write a function that checks whether a password is good, so we’ll throw an error if the user tries an obvious password:
+
+```swift
+enum PasswordError: Error {
+    case obvious
+}
+```
+
+Now we’ll write a **checkPassword()** function that will throw that error if something goes wrong. This means using the **throws** keyword before the function’s return value, then using throw **PasswordError.obvious** if their password is "password".
+
+Here’s that in Swift:
+
+```swift
+func checkPassword(_ password: String) throws -> Bool {
+    if password == "password" {
+        throw PasswordError.obvious
+    }
+
+    return true
+}
+```
+
+### Running throwing functions
+
+Swift doesn’t like errors to happen when your program runs, which means it won’t let you run an error-throwing function by accident.
+
+Instead, you need to call these functions using three new keywords: **do** starts a section of code that might cause problems, **try** is used before every function that might throw an error, and **catch** lets you handle errors gracefully.
+
+If any errors are thrown inside the **do** block, execution immediately jumps to the **catch** block. Let’s try calling **checkPassword()** with a parameter that throws an error:
+
+```swift
+do {
+    try checkPassword("password")
+    print("That password is good!")
+} catch {
+    print("You can't use that password.")
+}
+```
+
+When that code runs, "You can’t use that password" is printed, but "That password is good" won’t be – that code will never be reached, because the error is thrown.
+
+### inout parameters
+
+All parameters passed into a Swift function are constants, so you can’t change them. If you want, you can pass in one or more parameters as **inout**, which means they can be changed inside your function, and those changes reflect in the original value outside the function.
+
+For example, if you want to double a number in place – i.e., change the value directly rather than returning a new one – you might write a function like this:
+
+```swift
+func doubleInPlace(number: inout Int) {
+    number *= 2
+}
+```
+
+To use that, you first need to make a variable integer – you can’t use constant integers with **inout**, because they might be changed. You also need to pass the parameter to **doubleInPlace** using an ampersand, **&**, before its name, which is an explicit recognition that you’re aware it is being used as **inout**.
+
+In code, you’d write this:
+
+```swift
+var myNum = 10 
+doubleInPlace(number: &myNum)
 ```
