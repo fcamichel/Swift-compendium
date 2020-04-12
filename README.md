@@ -50,6 +50,18 @@
   * [Writing throwing functions](#writing-throwing-functions)
   * [Running throwing functions](#running-throwing-functions)
   * [inout parameters](#inout-parameters)
+- [Closures](#closures)
+  * [Creating basic closures](#creating-basic-closures)
+  * [Accepting parameters in a closure](#accepting-parameters-in-a-closure)
+  * [Returning values from a closure](#returning-values-from-a-closure)
+  * [Closures as parameters](#closures-as-parameters)
+  * [Trailing closure syntax](#trailing-closure-syntax)
+  * [Using closures as parameters when they accept parameters](#using-closures-as-parameters-when-they-accept-parameters)
+  * [Using closures as parameters when they return values](#using-closures-as-parameters-when-they-return-values)
+  * [Shorthand parameter names](#shorthand-parameter-names)
+  * [Closures with multiple parameters](#closures-with-multiple-parameters)
+  * [Returning closures from functions](#returning-closures-from-functions)
+  * [Capturing values](#capturing-values)
 
 ## Simple types
 
@@ -1146,4 +1158,329 @@ In code, you’d write this:
 ```swift
 var myNum = 10 
 doubleInPlace(number: &myNum)
+```
+
+## Closures
+
+### Creating basic closures
+
+Swift lets us use functions just like any other type such as strings and integers. This means you can create a function and assign it to a variable, call that function using that variable, and even pass that function into other functions as parameters.
+
+Functions used in this way are called *closures*, and although they work like functions they are written a little differently.
+
+Let’s start with a simple example that prints a message:
+
+```swift
+let driving = {
+    print("I'm driving in my car")
+}
+```
+
+That effectively creates a function without a name, and assigns that function to **driving**. You can now call **driving()** as if it were a regular function, like this:
+
+```swift
+driving()
+```
+
+### Accepting parameters in a closure
+
+When you create closures, they don’t have a name or space to write any parameters. That doesn’t mean they can’t *accept* parameters, just that they do so in a different way: they are listed *inside* the open braces.
+
+To make a closure accept parameters, list them inside parentheses just after the opening brace, then write **in** so that Swift knows the main body of the closure is starting.
+
+For example, we could make a closure that accepts a place name string as its only parameter like this:
+
+```swift
+let driving = { (place: String) in
+    print("I'm going to \(place) in my car")
+}
+```
+
+One of the differences between functions and closures is that you don’t use parameter labels when running closures. So, to call driving() now we’d write this:
+
+```swift
+driving("London")
+```
+
+### Returning values from a closure
+
+Closures can also return values, and they are written similarly to parameters: you write them inside your closure, directly before the **in** keyword.
+
+To demonstrate this, we’re going to take our **driving()** closure and make it return its value rather than print it directly. Here’s the original:
+
+```swift
+let driving = { (place: String) in
+    print("I'm going to \(place) in my car")
+}
+```
+
+We want a closure that returns a string rather than printing the message directly, so we need to use **-> String** before **in**, then use **return** just like a normal function:
+
+```swift
+let drivingWithReturn = { (place: String) -> String in
+    return "I'm going to \(place) in my car"
+}
+```
+
+We can now run that closure and print its return value:
+
+```swift
+let message = drivingWithReturn("London")
+print(message)
+```
+
+### Closures as parameters
+
+Because closures can be used just like strings and integers, you can pass them into functions. The syntax for this can hurt your brain at first, so we’re going to take it slow.
+
+First, here’s our basic **driving()** closure again:
+
+```swift
+let driving = {
+    print("I'm driving in my car")
+}
+```
+
+If we wanted to pass that closure into a function so it can be run inside that function, we would specify the parameter type as **() -> Void**. That means "accepts no parameters, and returns **Void**" – Swift’s way of saying "nothing".
+
+So, we can write a **travel()** function that accepts different kinds of traveling actions, and prints a message before and after:
+
+```swift
+func travel(action: () -> Void) {
+    print("I'm getting ready to go.")
+    action()
+    print("I arrived!")
+}
+```
+
+We can now call that using our **driving** closure, like this:
+
+```swift
+travel(action: driving)
+```
+
+### Trailing closure syntax
+
+If the last parameter to a function is a closure, Swift lets you use special syntax *called trailing closure syntax*. Rather than pass in your closure as a parameter, you pass it directly after the function inside braces.
+
+To demonstrate this, here’s our **travel()** function again. It accepts an **action** closure so that it can be run between two **print()** calls:
+
+```swift
+func travel(action: () -> Void) {
+    print("I'm getting ready to go.")
+    action()
+    print("I arrived!")
+}
+```
+
+Because its last parameter is a closure, we can call **travel()** using trailing closure syntax like this:
+
+```swift
+travel() {
+    print("I'm driving in my car")
+}
+```
+
+In fact, because there aren’t any other parameters, we can eliminate the parentheses entirely:
+
+```swift
+travel {
+    print("I'm driving in my car")
+}
+```
+
+Trailing closure syntax is extremely common in Swift, so it’s worth getting used to.
+
+### Using closures as parameters when they accept parameters
+
+This is where closures can start to be read a bit like line noise: a closure you pass into a function can also accept its own parameters.
+
+We’ve been using **() -> Void** to mean "accepts no parameters and returns nothing", but you can go ahead and fill the **()** with the types of any parameters that your closure should accept.
+
+To demonstrate this, we can write a **travel()** function that accepts a closure as its only parameter, and that closure in turn accepts a string:
+
+```swift
+func travel(action: (String) -> Void) {
+    print("I'm getting ready to go.")
+    action("London")
+    print("I arrived!")
+}
+```
+
+Now when we call **travel()** using trailing closure syntax, our closure code is required to accept a string:
+
+```swift
+travel { (place: String) in
+    print("I'm going to \(place) in my car")
+}
+```
+
+### Using closures as parameters when they return values
+
+We’ve been using **() -> Void** to mean "accepts no parameters and returns nothing", but you can replace that Void with any type of data to force the closure to return a value.
+
+To demonstrate this, we can write a **travel()** function that accepts a closure as its only parameter, and that closure in turn accepts a string and returns a string:
+
+```swift
+func travel(action: (String) -> String) {
+    print("I'm getting ready to go.")
+    let description = action("London")
+    print(description)
+    print("I arrived!")
+}
+```
+
+Now when we call **travel()** using trailing closure syntax, our closure code is required to accept a string and return a string:
+
+```swift
+travel { (place: String) -> String in
+    return "I'm going to \(place) in my car"
+}
+```
+
+### Shorthand parameter names
+
+We just made a **travel()** function. It accepts one parameter, which is a closure that itself accepts one parameter and returns a string. That closure is then run between two calls to **print()**.
+
+Here’s that in code:
+
+```swift
+func travel(action: (String) -> String) {
+    print("I'm getting ready to go.")
+    let description = action("London")
+    print(description)
+    print("I arrived!")
+}
+```
+
+We can call **travel()** using something like this:
+
+```swift
+travel { (place: String) -> String in
+    return "I'm going to \(place) in my car"
+}
+```
+
+However, Swift *knows* the parameter to that closure must be a string, so we can remove it:
+
+```swift
+travel { place -> String in
+    return "I'm going to \(place) in my car"
+}
+```
+
+It also knows the closure must return a string, so we can remove that. As the closure only has one line of code that must be the one that returns the value, so Swift lets us remove the **return** keyword too:
+
+```swift
+travel { place in
+    "I'm going to \(place) in my car"
+}
+```
+
+Swift has a shorthand syntax that lets you go even shorter. Rather than writing **place in** we can let Swift provide automatic names for the closure’s parameters. These are named with a dollar sign, then a number counting from 0.
+
+```swift
+travel {
+    "I'm going to \($0) in my car"
+}
+```
+
+### Closures with multiple parameters
+
+Just to make sure everything is clear, we’re going to write another closure example using two parameters.
+
+This time our **travel()** function will require a closure that specifies where someone is traveling to, and the speed they are going. This means we need to use **(String, Int) -> String** for the parameter’s type:
+
+```swift
+func travel(action: (String, Int) -> String) {
+    print("I'm getting ready to go.")
+    let description = action("London", 60)
+    print(description)
+    print("I arrived!")
+}
+```
+
+We’re going to call that using a trailing closure and shorthand closure parameter names. Because this accepts two parameters, we’ll be getting both **\$0** and **\$1**:
+
+```swift
+travel {
+    "I'm going to \($0) at \($1) miles per hour."
+}
+```
+
+Some people prefer not to use shorthand parameter names like **\$0** because it can be confusing, and that’s OK – do whatever works best for you.
+
+### Returning closures from functions
+
+In the same way that you can pass a closure to a function, you can get closures returned *from* a function too.
+
+The syntax for this is a bit confusing a first, because it uses **->** twice: once to specify your function’s return value, and a second time to specify your closure’s return value.
+
+To try this out, we’re going to write a **travel()** function that accepts no parameters, but returns a closure. The closure that gets returned must be called with a string, and will return nothing.
+
+Here’s how that looks in Swift:
+
+```swift
+func travel() -> (String) -> Void {
+    return {
+        print("I'm going to \($0)")
+    }
+}
+```
+
+We can now call **travel()** to get back that closure, then call it as a function:
+
+```swift
+let result = travel()
+result("London")
+```
+
+It’s technically allowable – although really not recommended! – to call the return value from **travel()** directly:
+
+```swift
+let result2 = travel()("London")
+```
+
+### Capturing values
+
+If you use any external values inside your closure, Swift *captures* them – stores them alongside the closure, so they can be modified even if they don’t exist any more.
+
+Right now we have a **travel()** function that returns a closure, and the returned closure accepts a string as its only parameter and returns nothing:
+
+```swift
+func travel() -> (String) -> Void {
+    return {
+        print("I'm going to \($0)")
+    }
+}
+```
+
+We can call **travel()** to get back the closure, then call that closure freely:
+
+```swift
+let result = travel()
+result("London")
+```
+
+Closure capturing happens if we create values in **travel()** that get used inside the closure. For example, we might want to track how often the returned closure is called:
+
+```swift
+func travel() -> (String) -> Void {
+    var counter = 1
+
+    return {
+        print("\(counter). I'm going to \($0)")
+        counter += 1
+    }
+}
+```
+
+Even though that **counter** variable was created inside **travel()**, it gets captured by the closure so it will still remain alive for that closure.
+
+So, if we call **result("London")** multiple times, the counter will go up and up:
+
+```swift
+result("London")
+result("London")
+result("London")
 ```
