@@ -62,6 +62,19 @@
   * [Closures with multiple parameters](#closures-with-multiple-parameters)
   * [Returning closures from functions](#returning-closures-from-functions)
   * [Capturing values](#capturing-values)
+- [Structs](#structs)
+  * [Creating your own structs](#creating-your-own-structs)
+  * [Computed properties](#computed-properties)
+  * [Property observers](#property-observers)
+  * [Methods](#methods)
+  * [Mutating methods](#mutating-methods)
+  * [Properties and methods of strings](#properties-and-methods-of-strings)
+  * [Properties and methods of arrays](#properties-and-methods-of-arrays)
+  * [Initializers](#initializers)
+  * [Referring to the current instance](#referring-to-the-current-instance)
+  * [Lazy properties](#lazy-properties)
+  * [Static properties and methods](#static-properties-and-methods)
+  * [Access control](#access-control)
 
 ## Simple types
 
@@ -1484,3 +1497,422 @@ result("London")
 result("London")
 result("London")
 ```
+
+## Structs
+
+### Creating your own structs
+
+Swift lets you design your own types in two ways, of which the most common are called structures, or just *structs*. Structs can be given their own variables and constants, and their own functions, then created and used however you want.
+
+Let’s start with a simple example: we’re going to create a **Sport** struct that stores its name as a string. Variables inside structs are called properties, so this is a struct with one property:
+
+```swift
+struct Sport {
+    var name: String
+}
+```
+
+That defines the type, so now we can create and use an instance of it:
+
+```swift
+var tennis = Sport(name: "Tennis")
+print(tennis.name)
+```
+
+We made both **name** and **tennis** variable, so we can change them just like regular variables:
+
+```swift
+tennis.name = "Lawn tennis"
+```
+
+Properties can have default values just like regular variables, and you can usually rely on Swift’s type inference.
+
+### Computed properties
+
+We just created a **Sport** struct like this:
+
+```swift
+struct Sport {
+    var name: String
+}
+```
+
+That has a *name* property that stores a **String**. These are called *stored* properties, because Swift has a different kind of property called a *computed* property – a property that runs code to figure out its value.
+
+We’re going to add another stored property to the **Sport** struct, then a computed property. Here’s how that looks:
+
+```swift
+struct Sport {
+    var name: String
+    var isOlympicSport: Bool
+
+    var olympicStatus: String {
+        if isOlympicSport {
+            return "\(name) is an Olympic sport"
+        } else {
+            return "\(name) is not an Olympic sport"
+        }
+    }
+}
+```
+
+As you can see, **olympicStatus** looks like a regular **String**, but it returns different values depending on the other properties.
+
+We can try it out by creating a new instance of **Sport**:
+
+```swift
+let chessBoxing = Sport(name: "Chessboxing", isOlympicSport: false)
+print(chessBoxing.olympicStatus)
+```
+
+### Property observers
+
+Property observers let you run code before or after any property changes. To demonstrate this, we’ll write a **Progress** struct that tracks a task and a completion percentage:
+
+```swift
+struct Progress {
+    var task: String
+    var amount: Int
+}
+```
+
+We can now create an instance of that struct and adjust its progress over time:
+
+```swift
+var progress = Progress(task: "Loading data", amount: 0)
+progress.amount = 30
+progress.amount = 80
+progress.amount = 100
+```
+
+What we *want* to happen is for Swift to print a message every time **amount** changes, and we can use a **didSet** property observer for that. This will run some code every time **amount** changes:
+
+```swift
+struct Progress {
+    var task: String
+    var amount: Int {
+        didSet {
+            print("\(task) is now \(amount)% complete")
+        }
+    }
+}
+```
+
+You can also use **willSet** to take action *before* a property changes, but that is rarely used.
+
+### Methods
+
+Structs can have functions inside them, and those functions can use the properties of the struct as they need to. Functions inside structs are called *methods*, but they still use the same **func** keyword.
+
+We can demonstrate this with a **City** struct. This will have a **population** property that stores how many people are in the city, plus a **collectTaxes()** method that returns the population count multiplied by 1000. Because the method belongs to **City** it can read the current city’s **population** property.
+
+Here’s the code:
+
+```swift
+struct City {
+    var population: Int
+
+    func collectTaxes() -> Int {
+        return population * 1000
+    }
+}
+```
+
+That method belongs to the struct, so we call it on instances of the struct like this:
+
+```swift
+let london = City(population: 9_000_000)
+london.collectTaxes()
+```
+
+### Mutating methods
+
+f a struct has a variable property but the instance of the struct was created as a constant, that property can’t be changed – the struct is constant, so all its properties are also constant regardless of how they were created.
+
+The problem is that when you create the struct Swift has no idea whether you will use it with constants or variables, so by default it takes the safe approach: Swift won’t let you write methods that change properties unless you specifically request it.
+
+When you *want* to change a property inside a method, you need to mark it using the **mutating** keyword, like this:
+
+```swift
+struct Person {
+    var name: String
+
+    mutating func makeAnonymous() {
+        name = "Anonymous"
+    }
+}
+```
+
+Because it changes the property, Swift will only allow that method to be called on **Person** instances that are variables:
+
+```swift
+var person = Person(name: "Ed")
+person.makeAnonymous()
+```
+
+### Properties and methods of strings
+
+We’ve used lots of strings so far, and it turns out they are structs – they have their own methods and properties we can use to query and manipulate the string.
+
+First, let’s create a test string:
+
+```swift
+let string = "Do or do not, there is no try."
+```
+
+You can read the number of characters in a string using its **count** property:
+
+```swift
+print(string.count)
+```
+
+They have a **hasPrefix()** method that returns true if the string starts with specific letters:
+
+```swift
+print(string.hasPrefix("Do"))
+```
+
+You can uppercase a string by calling its **uppercased()** method:
+
+```swift
+print(string.uppercased())
+```
+
+And you can even have Swift sort the letters of the string into an array:
+
+```swift
+print(string.sorted())
+```
+
+Strings have lots more properties and methods – try typing **string**. to bring up Xcode’s code completion options.
+
+### Properties and methods of arrays
+
+Arrays are also structs, which means they too have their own methods and properties we can use to query and manipulate the array.
+
+Here’s a simple array to get us started:
+
+```swift
+var toys = ["Woody"]
+```
+
+You can read the number of items in an array using its **count** property:
+
+```swift
+print(toys.count)
+```
+
+If you want to add a new item, use the **append()** method like this:
+
+```swift
+toys.append("Buzz")
+```
+
+You can locate any item inside an array using its **firstIndex()** method, like this:
+
+```swift
+toys.firstIndex(of: "Buzz")
+```
+
+That will return 1 because arrays count from 0.
+
+Just like with strings, you can have Swift sort the items of the array alphabetically:
+
+```swift
+print(toys.sorted())
+```
+
+Finally, if you want to remove an item, use the **remove()** method like this:
+
+```swift
+toys.remove(at: 0)
+```
+
+Arrays have lots more properties and methods – try typing **toys**. to bring up Xcode’s code completion options.
+
+### Initializers
+
+Initializers are special methods that provide different ways to create your struct. All structs come with one by default, called their *memberwise initializer* – this asks you to provide a value for each property when you create the struct.
+
+You can see this if we create a **User** struct that has one property:
+
+```swift
+struct User {
+    var username: String
+}
+```
+
+When we create one of those structs, we must provide a username:
+
+```swift
+var user = User(username: "twostraws")
+```
+
+We can provide our own initializer to replace the default one. For example, we might want to create all new users as "Anonymous" and print a message, like this:
+
+```swift
+struct User {
+    var username: String
+
+    init() {
+        username = "Anonymous"
+        print("Creating a new user!")
+    }
+}
+```
+
+You *don’t* write **func** before initializers, but you do need to make sure all properties have a value before the initializer ends.
+
+Now our initializer accepts no parameters, we need to create the struct like this:
+
+```swift
+var user = User()
+user.username = "twostraws"
+```
+
+### Referring to the current instance
+
+Inside methods you get a special constant called **self**, which points to whatever instance of the struct is currently being used. This **self** value is particularly useful when you create initializers that have the same parameter names as your property.
+
+For example, if you create a **Person** struct with a **name** property, then tried to write an initializer that accepted a **name** parameter, **self** helps you distinguish between the property and the parameter – **self.name** refers to the property, whereas **name** refers to the parameter.
+
+Here’s that in code:
+
+```swift
+struct Person {
+    var name: String
+
+    init(name: String) {
+        print("\(name) was born!")
+        self.name = name
+    }
+}
+```
+
+### Lazy properties
+
+As a performance optimization, Swift lets you create some properties only when they are needed. As an example, consider this **FamilyTree** struct – it doesn’t do much, but in theory creating a family tree for someone takes a long time:
+
+```swift
+struct FamilyTree {
+    init() {
+        print("Creating family tree!")
+    }
+}
+```
+
+We might use that **FamilyTree** struct as a property inside a **Person** struct, like this:
+
+```swift
+struct Person {
+    var name: String
+    var familyTree = FamilyTree()
+
+    init(name: String) {
+        self.name = name
+    }
+}
+
+var ed = Person(name: "Ed")
+```
+
+But what if we didn’t always need the family tree for a particular person? If we add the **lazy** keyword to the **familyTree** property, then Swift will only create the **FamilyTree** struct when it’s first accessed:
+
+```swift
+lazy var familyTree = FamilyTree()
+```
+
+So, if you want to see the "Creating family tree!" message, you need to access the property at least once:
+
+```swift
+ed.familyTree
+```
+
+### Static properties and methods
+
+All the properties and methods we’ve created so far have belonged to individual instances of structs, which means that if we had a **Student** struct we could create several student instances each with their own properties and methods:
+
+```swift
+struct Student {
+    var name: String
+
+    init(name: String) {
+        self.name = name
+    }
+}
+
+let ed = Student(name: "Ed")
+let taylor = Student(name: "Taylor")
+```
+
+You can also ask Swift to share specific properties and methods across all instances of the struct by declaring them as *static*.
+
+To try this out, we’re going to add a static property to the **Student** struct to store how many students are in the class. Each time we create a new student, we’ll add one to it:
+
+```swift
+struct Student {
+    static var classSize = 0
+    var name: String
+
+    init(name: String) {
+        self.name = name
+        Student.classSize += 1
+    }
+}
+```
+
+Because the **classSize** property belongs to the struct itself rather than instances of the struct, we need to read it using **Student.classSize**:
+
+```swift
+print(Student.classSize)
+```
+
+### Access control
+
+Access control lets you restrict which code can use properties and methods. This is important because you might want to stop people reading a property directly, for example.
+
+We could create a **Person** struct that has an **id** property to store their social security number:
+
+```swift
+struct Person {
+    var id: String
+
+    init(id: String) {
+        self.id = id
+    }
+}
+
+let ed = Person(id: "12345")
+```
+
+Once that person has been created, we can make their **id** be private so you can’t read it from outside the struct – trying to write **ed.id** simply won’t work.
+
+Just use the **private** keyword, like this:
+
+```swift
+struct Person {
+    private var id: String
+
+    init(id: String) {
+        self.id = id
+    }
+}
+```
+
+Now only methods inside **Person** can read the **id** property. For example:
+
+```swift
+struct Person {
+    private var id: String
+
+    init(id: String) {
+        self.id = id
+    }
+
+    func identify() -> String {
+        return "My social security number is \(id)"
+    }
+}
+```
+
+Another common option is **public**, which lets all other code use the property or method.
