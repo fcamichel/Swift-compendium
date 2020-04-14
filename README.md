@@ -75,6 +75,21 @@
   * [Lazy properties](#lazy-properties)
   * [Static properties and methods](#static-properties-and-methods)
   * [Access control](#access-control)
+- [Classes](#classes)
+  * [Creating your own classes](#creating-your-own-classes)
+  * [Class inheritance](#class-inheritance)
+  * [Overriding methods](#overriding-methods)
+  * [Final classes](#final-classes)
+  * [Copying objects](#copying-objects)
+  * [Deinitializers](#deinitializers)
+  * [Mutability](#mutability)
+  * [Choosing between structures and classes](#choosing-between-structures-and-classes)
+- [Protocols and extensions](#protocols-and-extensions)
+  * [Protocols](#protocols)
+  * [Protocol inheritance](#protocol-inheritance)
+  * [Extensions](#extensions)
+  * [Protocol extensions](#protocol-extensions)
+  * [Protocol-oriented programming](#protocol-oriented-programming)
 
 ## Simple types
 
@@ -1916,3 +1931,398 @@ struct Person {
 ```
 
 Another common option is **public**, which lets all other code use the property or method.
+
+## Classes
+
+### Creating your own classes
+
+Classes are similar to structs in that they allow you to create new types with properties and methods, but they have five important differences and I’m going to walk you through each of those differences one at a time.
+
+The first difference between classes and structs is that classes never come with a memberwise initializer. This means if you have properties in your class, you must always create your own initializer.
+
+For example:
+
+```swift
+class Dog {
+    var name: String
+    var breed: String
+
+    init(name: String, breed: String) {
+        self.name = name
+        self.breed = breed
+    }
+}
+```
+
+Creating instances of that class looks just the same as if it were a struct:
+
+```swift
+let poppy = Dog(name: "Poppy", breed: "Poodle")
+```
+
+### Class inheritance
+
+The second difference between classes and structs is that you can create a class based on an existing class – it inherits all the properties and methods of the original class, and can add its own on top.
+
+This is called class inheritance or *subclassing*, the class you inherit from is called the "parent" or "super" class, and the new class is called the "child" class.
+
+Here’s the **Dog** class we just created:
+
+```swift
+class Dog {
+    var name: String
+    var breed: String
+
+    init(name: String, breed: String) {
+        self.name = name
+        self.breed = breed
+    }
+}
+```
+
+We could create a new class based on that one called **Poodle**. It will inherit the same properties and initializer as **Dog** by default:
+
+```swift
+class Poodle: Dog {
+
+}
+```
+
+However, we can also give **Poodle** its own initializer. We know it will always have the breed "Poodle", so we can make a new initializer that only needs a **name** property. Even better, we can make the **Poodle** initializer call the **Dog** initializer directly so that all the same setup happens:
+
+```swift
+class Poodle: Dog {
+    init(name: String) {
+        super.init(name: name, breed: "Poodle")
+    }
+}
+```
+
+For safety reasons, Swift always makes you call **super.init()** from child classes – just in case the parent class does some important work when it’s created.
+
+### Overriding methods
+
+Child classes can replace parent methods with their own implementations – a process known as *overriding*. Here’s a trivial **Dog** class with a **makeNoise()** method:
+
+```swift
+class Dog {
+    func makeNoise() {
+        print("Woof!")
+    }
+}
+```
+
+If we create a new **Poodle** class that inherits from **Dog**, it will inherit the **makeNoise()** method. So, this will print "Woof!":
+
+```swift
+class Poodle: Dog {
+}
+
+let poppy = Poodle()
+poppy.makeNoise()
+```
+
+Method overriding allows us to change the implementation of **makeNoise()** for the **Poodle** class.
+
+Swift requires us to use **override func** rather than just **func** when overriding a method – it stops you from overriding a method by accident, and you’ll get an error if you try to override something that doesn’t exist on the parent class:
+
+```swift
+class Poodle: Dog {
+    override func makeNoise() {
+        print("Yip!")
+    }
+}
+```
+
+With that change, **poppy.makeNoise()** will print "Yip!" rather than "Woof!".
+
+### Final classes
+
+Although class inheritance is very useful – and in fact large parts of Apple’s platforms require you to use it – sometimes you want to disallow other developers from building their own class based on yours.
+
+Swift gives us a **final** keyword just for this purpose: when you declare a class as being final, no other class can inherit from it. This means they can’t override your methods in order to change your behavior – they need to use your class the way it was written.
+
+To make a class final just put the **final** keyword before it, like this:
+
+```swift
+final class Dog {
+    var name: String
+    var breed: String
+
+    init(name: String, breed: String) {
+        self.name = name
+        self.breed = breed
+    }
+}
+```
+
+### Copying objects
+
+The third difference between classes and structs is how they are copied. When you copy a struct, both the original and the copy are different things – changing one won’t change the other. When you copy a *class*, both the original and the copy point to the *same* thing, so changing one *does* change the other.
+
+For example, here’s a simple **Singer** class that has a **name** property with a default value:
+
+```swift
+class Singer {
+    var name = "Taylor Swift"
+}
+```
+
+If we create an instance of that class and prints its name, we’ll get "Taylor Swift":
+
+```swift
+var singer = Singer()
+print(singer.name)
+```
+
+Now let’s create a second variable from the first one and change its name:
+
+```swift
+var singerCopy = singer
+singerCopy.name = "Justin Bieber"
+```
+
+Because of the way classes work, both **singer** and **singerCopy** point to the same object in memory, so when we print the singer name again we’ll see "Justin Bieber":
+
+```swift
+print(singer.name)
+```
+
+On the other hand, if **Singer** were a struct then we would get "Taylor Swift" printed a second time:
+
+```swift
+struct Singer {
+    var name = "Taylor Swift"
+}
+```
+
+### Deinitializers
+
+The fourth difference between classes and structs is that classes can have *deinitializers* – code that gets run when an instance of a class is destroyed.
+
+To demonstrate this, here’s a **Person** class with a **name** property, a simple initializer, and a **printGreeting()** method that prints a message:
+
+```swift
+class Person {
+    var name = "John Doe"
+
+    init() {
+        print("\(name) is alive!")
+    }
+
+    func printGreeting() {
+        print("Hello, I'm \(name)")
+    }
+}
+```
+
+We’re going to create a few instances of the **Person** class inside a loop, because each time the loop goes around a new person will be created then destroyed:
+
+```swift
+for _ in 1...3 {
+    let person = Person()
+    person.printGreeting()
+}
+```
+
+And now for the deinitializer. This will be called when the **Person** instance is being destroyed:
+
+```swift
+deinit {
+    print("\(name) is no more!")
+}
+```
+
+### Mutability
+
+The final difference between classes and structs is the way they deal with constants. If you have a constant struct with a variable property, that property can’t be changed because the struct itself is constant.
+
+However, if you have a constant *class* with a variable property, that property *can* be changed. Because of this, classes don’t need the **mutating** keyword with methods that change properties; that’s only needed with structs.
+
+This difference means you can change any variable property on a class even when the class is created as a constant – this is perfectly valid code:
+
+```swift
+class Singer {
+    var name = "Taylor Swift"
+}
+
+let taylor = Singer()
+taylor.name = "Ed Sheeran"
+print(taylor.name)
+```
+
+If you want to stop that from happening you need to make the property constant:
+
+```swift
+class Singer {
+    let name = "Taylor Swift"
+}
+```
+
+### Choosing between structures and classes
+
+Structures and classes are good choices for storing data and modeling behavior in your apps, but their similarities can make it difficult to choose one over the other.
+
+Consider the following recommendations to help choose which option makes sense when adding a new data type to your app.
+
+- Use structures by default.
+- Use classes when you need Objective-C interoperability.
+- Use classes when you need to control the identity of the data you're modeling.
+- Use structures along with protocols to adopt behavior by sharing implementations.
+
+## Protocols and extensions
+
+### Protocols
+
+Protocols are a way of describing what properties and methods something must have. You then tell Swift which types use that protocol – a process known as adopting or conforming to a protocol.
+
+For example, we can write a function that accepts something with an **id** property, but we don’t care precisely what type of data is used. We’ll start by creating an **Identifiable** protocol, which will require all conforming types to have an **id** string that can be read ("get") or written ("set"):
+
+```swift
+protocol Identifiable {
+    var id: String { get set }
+}
+```
+
+We can’t *create* instances of that protocol - it’s a description of what we want, rather than something we can create and use directly. But we *can* create a struct that conforms to it:
+
+```swift
+struct User: Identifiable {
+    var id: String
+}
+```
+
+Finally, we’ll write a **displayID()** function that accepts any **Identifiable** object:
+
+```swift
+func displayID(thing: Identifiable) {
+    print("My ID is \(thing.id)")
+}
+```
+
+### Protocol inheritance
+
+One protocol can inherit from another in a process known as *protocol inheritance*. Unlike with classes, you can inherit from multiple protocols at the same time before you add your own customizations on top.
+
+We’re going to define three protocols: **Payable** requires conforming types to implement a **calculateWages()** method, **NeedsTraining** requires conforming types to implement a **study()** method, and **HasVacation** requires conforming types to implement a **takeVacation()** method:
+
+```swift
+protocol Payable {
+    func calculateWages() -> Int
+}
+
+protocol NeedsTraining {
+    func study()
+}
+
+protocol HasVacation {
+    func takeVacation(days: Int)
+}
+```
+
+We can now create a single **Employee** protocol that brings them together in one protocol. We don’t need to add anything on top, so we’ll just write open and close braces:
+
+```swift
+protocol Employee: Payable, NeedsTraining, HasVacation { }
+```
+
+Now we can make new types conform to that single protocol rather than each of the three individual ones.
+
+### Extensions
+
+Extensions allow you to add methods to existing types, to make them do things they weren’t originally designed to do.
+
+For example, we could add an extension to the **Int** type so that it has a **squared()** method that returns the current number multiplied by itself:
+
+```swift
+extension Int {
+    func squared() -> Int {
+        return self * self
+    }
+}
+```
+
+To try that out, just create an integer and you’ll see it now has a **squared()** method:
+
+```swift
+let number = 8
+number.squared()
+```
+
+Swift doesn’t let you add stored properties in extensions, so you must use computed properties instead. For example, we could add a new **isEven** computed property to integers that returns true if it holds an even number:
+
+```swift
+extension Int {
+    var isEven: Bool {
+        return self % 2 == 0
+    }
+}
+```
+
+### Protocol extensions
+
+Protocols let you describe what methods something should have, but don’t provide the code inside. Extensions let you provide the code inside your methods, but only affect one data type – you can’t add the method to lots of types at the same time.
+
+Protocol extensions solve both those problems: they are like regular extensions, except rather than extending a specific type like **Int** you extend a whole protocol so that all conforming types get your changes.
+
+For example, here is an array and a set containing some names:
+
+```swift
+let pythons = ["Eric", "Graham", "John", "Michael", "Terry", "Terry"]
+let beatles = Set(["John", "Paul", "George", "Ringo"])
+```
+
+Swift’s arrays and sets both conform to a protocol called **Collection**, so we can write an extension to that protocol to add a **summarize()** method to print the collection neatly
+
+```swift
+extension Collection {
+    func summarize() {
+        print("There are \(count) of us:")
+
+        for name in self {
+            print(name)
+        }
+    }
+}
+```
+
+Both **Array** and **Set** will now have that method, so we can try it out:
+
+```swift
+pythons.summarize()
+beatles.summarize()
+```
+
+### Protocol-oriented programming
+
+Protocol extensions can provide default implementations for our own protocol methods. This makes it easy for types to conform to a protocol, and allows a technique called "protocol-oriented programming" – crafting your code around protocols and protocol extensions.
+
+First, here’s a protocol called **Identifiable** that requires any conforming type to have an **id** property and an **identify()** method:
+
+```swift
+protocol Identifiable {
+    var id: String { get set }
+    func identify()
+}
+```
+
+We *could* make every conforming type write their own **identify()** method, but protocol extensions allow us to provide a default:
+
+```swift
+extension Identifiable {
+    func identify() {
+        print("My ID is \(id).")
+    }
+}
+```
+
+Now when we create a type that conforms to **Identifiable** it gets **identify()** automatically:
+
+```swift
+struct User: Identifiable {
+    var id: String
+}
+
+let twostraws = User(id: "twostraws")
+twostraws.identify()
+```
